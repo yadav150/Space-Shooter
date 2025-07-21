@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Space Shooter — Yadav Subba</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <canvas id="gameCanvas" width="480" height="640"></canvas>
@@ -14,13 +14,18 @@
     <button id="startBtn">Start Game</button>
   </div>
 
-  <!-- Toast Message -->
+  <!-- Touch Controls -->
+  <div id="controls">
+    <button id="leftBtn">⬅️</button>
+    <button id="shootBtn">🔫</button>
+    <button id="rightBtn">➡️</button>
+  </div>
+
+  <!-- Toast -->
   <div id="toast" class="hidden"></div>
 
   <!-- Footer -->
-  <div style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-size: 14px;">
-    Developed by Yadav Subba
-  </div>
+  <div id="footer">Developed by Yadav Subba</div>
 
   <script src="main.js"></script>
 </body>
