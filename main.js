@@ -1,17 +1,19 @@
-// Space Shooter — Yadav Subba (Start Screen Added)
+// Space Shooter with Mobile Controls — Yadav Subba
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const startScreen = document.getElementById('startScreen');
 const startBtn = document.getElementById('startBtn');
 
-// Sounds
-const soundShoot = new Audio('sounds/shoot.wav');
-const soundHit = new Audio('sounds/hit.wav');
-const soundLevelUp = new Audio('sounds/levelup.wav');
+// Mobile buttons
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const shootBtn = document.getElementById('shootBtn');
 
 // Game state
 let gameStarted = false;
 const W = canvas.width, H = canvas.height;
+
 function fitCanvas() {
   const s = Math.min(window.innerWidth / W, window.innerHeight / H);
   canvas.style.transform = `scale(${s})`;
@@ -28,7 +30,10 @@ class Player {
     this.speed = 5;
   }
   draw() {
-    ctx.fillStyle = '#0f0';
+    const grad = ctx.createLinearGradient(this.x, this.y, this.x + this.w, this.y + this.h);
+    grad.addColorStop(0, '#0f0');
+    grad.addColorStop(1, '#0ff');
+    ctx.fillStyle = grad;
     ctx.fillRect(this.x, this.y, this.w, this.h);
     ctx.fillStyle = '#0a0';
     ctx.fillRect(this.x + 8, this.y - 10, this.w - 16, 10);
@@ -38,6 +43,7 @@ class Player {
     this.x = Math.max(0, Math.min(W - this.w, this.x));
   }
 }
+
 class Bullet {
   constructor(x, y) {
     this.x = x;
@@ -54,6 +60,7 @@ class Bullet {
     ctx.fillRect(this.x, this.y, this.w, this.h);
   }
 }
+
 class Enemy {
   constructor(x, y, s) {
     this.x = x;
@@ -100,22 +107,30 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// Input handling
 document.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'KeyP') paused = !paused;
 });
 document.addEventListener('keyup', e => keys[e.code] = false);
 
-// Start game
 startBtn.addEventListener('click', () => {
   gameStarted = true;
   startScreen.style.display = 'none';
   spawnEnemies();
+  canvas.focus();
   loop();
 });
 
-// Game logic
+// Touch controls
+leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
+
+rightBtn.addEventListener('touchstart', () => keys['ArrowRight'] = true);
+rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
+
+shootBtn.addEventListener('touchstart', () => keys['Space'] = true);
+shootBtn.addEventListener('touchend', () => keys['Space'] = false);
+
 function update() {
   if (!gameStarted || gameOver || paused) return;
 
@@ -124,8 +139,6 @@ function update() {
 
   if (keys['Space'] && shootCD <= 0) {
     bullets.push(new Bullet(player.x + player.w / 2 - 2, player.y));
-    soundShoot.currentTime = 0;
-    soundShoot.play();
     shootCD = 15;
   }
   shootCD = Math.max(0, shootCD - 1);
@@ -137,27 +150,16 @@ function update() {
 
   bullets.forEach((b, bi) => {
     enemies.forEach((e, ei) => {
-      if (
-        b.x < b.w + e.x &&
-        b.x + b.w > e.x &&
-        b.y < b.h + e.y &&
-        b.y + b.h > e.y
-      ) {
+      if (b.x < b.w + e.x && b.x + b.w > e.x && b.y < b.h + e.y && b.y + b.h > e.y) {
         bullets.splice(bi, 1);
         enemies.splice(ei, 1);
         score += 100;
-        soundHit.currentTime = 0;
-        soundHit.play();
       }
     });
   });
 
   enemies.forEach(e => {
-    if (
-      e.y + e.h >= player.y &&
-      e.x < player.x + player.w &&
-      e.x + e.w > player.x
-    ) {
+    if (e.y + e.h >= player.y && e.x < player.x + player.w && e.x + e.w > player.x) {
       gameOver = true;
     }
   });
@@ -166,13 +168,10 @@ function update() {
     level++;
     coins += 100;
     toast(`Level ${level - 1} complete! +100 coins`);
-    soundLevelUp.currentTime = 0;
-    soundLevelUp.play();
     spawnEnemies();
   }
 }
 
-// Draw everything
 function draw() {
   ctx.clearRect(0, 0, W, H);
   if (!gameStarted) return;
@@ -182,6 +181,7 @@ function draw() {
   enemies.forEach(e => e.draw());
 
   ctx.fillStyle = '#fff';
+  ctx.font = '16px Arial';
   ctx.fillText(`Score: ${score}`, 10, 20);
   ctx.fillText(`Level: ${level}`, 10, 40);
   ctx.fillText(`Coins: ${coins}`, 10, 60);
@@ -199,10 +199,8 @@ function draw() {
   }
 }
 
-// Game loop
-ctx.font = '16px Arial';
 function loop() {
   update();
   draw();
   if (gameStarted) requestAnimationFrame(loop);
-}
+    }
